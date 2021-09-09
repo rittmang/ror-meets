@@ -68,8 +68,8 @@ export default function Login({ csrfToken }) {
         </div>
         <div className="mt-4 text-neutral-600 text-center text-sm">
           Don&apos;t have an account? {/* replace this with your account creation flow */}
-          <a href="https://checkout.calendso.com" className="font-medium text-neutral-900">
-            Create an account
+          <a href="mailto:ritom@rightonrittman.in" className="font-medium text-neutral-900">
+            Contact for access
           </a>
         </div>
       </div>
