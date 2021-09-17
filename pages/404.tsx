@@ -10,25 +10,27 @@ const links = [
     title: "Documentation",
     description: "Learn how to integrate our tools with your app",
     icon: DocumentTextIcon,
-    href: "https://docs.calendso.com",
+    href: "https://docs.cal.com",
   },
   {
     title: "API Reference",
     description: "A complete API reference for our libraries",
     icon: CodeIcon,
-    href: "https://developer.calendso.com/api",
+    href: "https://api.docs.cal.com",
   },
   {
     title: "Blog",
     description: "Read our latest news and articles",
     icon: BookOpenIcon,
-    href: "https://calendso.com/blog",
+    href: "https://cal.com/blog",
   },
 ];
 
 export default function Custom404() {
   const router = useRouter();
   const username = router.asPath.replace("%20", "-");
+
+  const isEventType404 = router.asPath.includes("/event-types");
 
   return (
     <>

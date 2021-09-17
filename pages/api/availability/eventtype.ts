@@ -23,36 +23,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       customInputs: !req.body.customInputs
         ? undefined
         : {
-            deleteMany: {
-              eventTypeId: req.body.id,
-              NOT: {
-                id: { in: req.body.customInputs.filter((input) => !!input.id).map((e) => e.id) },
-              },
+          deleteMany: {
+            eventTypeId: req.body.id,
+            NOT: {
+              id: { in: req.body.customInputs.filter((input) => !!input.id).map((e) => e.id) },
             },
-            createMany: {
-              data: req.body.customInputs
-                .filter((input) => !input.id)
-                .map((input) => ({
-                  type: input.type,
-                  label: input.label,
-                  required: input.required,
-                  placeholder: input.placeholder,
-                })),
-            },
-            update: req.body.customInputs
-              .filter((input) => !!input.id)
+          },
+          createMany: {
+            data: req.body.customInputs
+              .filter((input) => !input.id)
               .map((input) => ({
-                data: {
-                  type: input.type,
-                  label: input.label,
-                  required: input.required,
-                  placeholder: input.placeholder,
-                },
-                where: {
-                  id: input.id,
-                },
+                type: input.type,
+                label: input.label,
+                required: input.required,
+                placeholder: input.placeholder,
               })),
           },
+          update: req.body.customInputs
+            .filter((input) => !!input.id)
+            .map((input) => ({
+              data: {
+                type: input.type,
+                label: input.label,
+                required: input.required,
+                placeholder: input.placeholder,
+              },
+              where: {
+                id: input.id,
+              },
+            })),
+        },
       periodType: req.body.periodType,
       periodDays: req.body.periodDays,
       periodStartDate: req.body.periodStartDate,
@@ -61,15 +61,38 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       minimumBookingNotice: req.body.minimumBookingNotice,
     };
 
+    if (req.body.schedulingType) {
+      data.schedulingType = req.body.schedulingType;
+    }
+
     if (req.method == "POST") {
+      if (req.body.teamId) {
+        data.team = {
+          connect: {
+            id: req.body.teamId,
+          },
+        };
+      }
+
       const eventType = await prisma.eventType.create({
         data: {
-          userId: session.user.id,
           ...data,
+          users: {
+            connect: {
+              id: parseInt(session.user.id),
+            },
+          },
         },
       });
       res.status(201).json({ eventType });
     } else if (req.method == "PATCH") {
+      if (req.body.users) {
+        data.users = {
+          set: [],
+          connect: req.body.users.map((id: number) => ({ id })),
+        };
+      }
+
       if (req.body.timeZone) {
         data.timeZone = req.body.timeZone;
       }

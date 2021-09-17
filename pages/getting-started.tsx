@@ -245,9 +245,8 @@ export default function Onboarding(props: OnboardingProps) {
               onClick={() => {
                 setIsAddCalDavIntegrationDialogOpen(false);
               }}
-              as="button"
-              className="btn btn-white mx-2">
-              Cancel
+              asChild>
+              <Button color="secondary">Cancel</Button>
             </DialogClose>
           </div>
         </DialogContent>
@@ -348,7 +347,7 @@ export default function Onboarding(props: OnboardingProps) {
   const steps = [
     {
       id: "welcome",
-      title: "Welcome to Calendso",
+      title: "Welcome to Cal.com",
       description:
         "Tell us what to call you and let us know what timezone you’re in. You’ll be able to edit this later.",
       Component: (

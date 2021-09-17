@@ -8,6 +8,7 @@ import logger from "@lib/logger";
 
 const log = logger.getChildLogger({ prefix: ["[lib] calendarClient"] });
 import { CalDavCalendar } from "./integrations/CalDav/CalDavCalendarAdapter";
+import { AppleCalendar } from "./integrations/Apple/AppleCalendarAdapter";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { google } = require("googleapis");
@@ -213,7 +214,9 @@ const MicrosoftOffice365Calendar = (credential): CalendarApiAdapter => {
 
   return {
     getAvailability: (dateFrom, dateTo, selectedCalendars) => {
-      const filter = "?startdatetime=" + dateFrom + "&enddatetime=" + dateTo;
+      const filter = `?startdatetime=${encodeURIComponent(dateFrom)}&enddatetime=${encodeURIComponent(
+        dateTo
+      )}`;
       return auth
         .getToken()
         .then((accessToken) => {
@@ -521,6 +524,8 @@ const calendars = (withCredentials): CalendarApiAdapter[] =>
           return MicrosoftOffice365Calendar(cred);
         case "caldav_calendar":
           return new CalDavCalendar(cred);
+        case "apple_calendar":
+          return new AppleCalendar(cred);
         default:
           return; // unknown credential, could be legacy? In any case, ignore
       }
@@ -558,11 +563,11 @@ const createEvent = async (
 
   const creationResult = credential
     ? await calendars([credential])[0]
-        .createEvent(richEvent)
-        .catch((e) => {
-          log.error("createEvent failed", e, calEvent);
-          success = false;
-        })
+      .createEvent(richEvent)
+      .catch((e) => {
+        log.error("createEvent failed", e, calEvent);
+        success = false;
+      })
     : null;
 
   const maybeHangoutLink = creationResult?.hangoutLink;
@@ -606,11 +611,11 @@ const updateEvent = async (
 
   const updateResult = credential
     ? await calendars([credential])[0]
-        .updateEvent(uidToUpdate, richEvent)
-        .catch((e) => {
-          log.error("updateEvent failed", e, calEvent);
-          success = false;
-        })
+      .updateEvent(uidToUpdate, richEvent)
+      .catch((e) => {
+        log.error("updateEvent failed", e, calEvent);
+        success = false;
+      })
     : null;
 
   if (!noMail) {
