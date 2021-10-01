@@ -6,26 +6,6 @@ import React from "react";
 
 import { HeadSeo } from "@components/seo/head-seo";
 
-const links = [
-  {
-    title: "Documentation",
-    description: "Learn how to integrate our tools with your app",
-    icon: DocumentTextIcon,
-    href: "https://docs.cal.com",
-  },
-  {
-    title: "API Reference",
-    description: "A complete API reference for our libraries",
-    icon: CodeIcon,
-    href: "https://api.docs.cal.com",
-  },
-  {
-    title: "Blog",
-    description: "Read our latest news and articles",
-    icon: BookOpenIcon,
-    href: "https://cal.com/blog",
-  },
-];
 
 export default function Custom404() {
   const router = useRouter();
