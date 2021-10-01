@@ -1,69 +1,62 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import prisma from "@lib/prisma";
-import { getBusyCalendarTimes } from "@lib/calendarClient";
 // import { getBusyVideoTimes } from "@lib/videoClient";
 import dayjs from "dayjs";
-<<<<<<< HEAD
+import type { NextApiRequest, NextApiResponse } from "next";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { user } = req.query;
-
-  const currentUser = await prisma.user.findFirst({
-=======
 import { asStringOrNull } from "@lib/asStringOrNull";
-import { User } from "@prisma/client";
+import { getBusyCalendarTimes } from "@lib/calendarClient";
+import prisma from "@lib/prisma";
+
+import { Prisma } from ".prisma/client";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const user = asStringOrNull(req.query.user);
   const dateFrom = dayjs(asStringOrNull(req.query.dateFrom));
   const dateTo = dayjs(asStringOrNull(req.query.dateTo));
+  const eventTypeId = parseInt(asStringOrNull(req.query.eventTypeId) || "");
 
   if (!dateFrom.isValid() || !dateTo.isValid()) {
     return res.status(400).json({ message: "Invalid time range given." });
   }
 
-  const currentUser: User = await prisma.user.findUnique({
->>>>>>> 06f5559ca00f9a106e8124b3dad127428bbc5694
+  const rawUser = await prisma.user.findUnique({
     where: {
-      username: user,
+      username: user as string,
     },
     select: {
       credentials: true,
       timeZone: true,
       bufferTime: true,
-<<<<<<< HEAD
-      id: true,
-=======
       availability: true,
       id: true,
       startTime: true,
       endTime: true,
->>>>>>> 06f5559ca00f9a106e8124b3dad127428bbc5694
+      selectedCalendars: true,
     },
   });
 
-  const selectedCalendars = await prisma.selectedCalendar.findMany({
-    where: {
-      userId: currentUser.id,
-    },
-  });
+  const getEventType = (id: number) =>
+    prisma.eventType.findUnique({
+      where: { id },
+      select: {
+        timeZone: true,
+        availability: {
+          select: {
+            startTime: true,
+            endTime: true,
+            days: true,
+          },
+        },
+      },
+    });
 
-<<<<<<< HEAD
-  const calendarBusyTimes = await getBusyCalendarTimes(
-    currentUser.credentials,
-    req.query.dateFrom,
-    req.query.dateTo,
-    selectedCalendars
-  );
-  // const videoBusyTimes = await getBusyVideoTimes(
-  //   currentUser.credentials,
-  //   req.query.dateFrom,
-  //   req.query.dateTo
-  // );
-  // calendarBusyTimes.push(...videoBusyTimes);
+  type EventType = Prisma.PromiseReturnType<typeof getEventType>;
+  let eventType: EventType | null = null;
+  if (eventTypeId) eventType = await getEventType(eventTypeId);
 
-  const bufferedBusyTimes = calendarBusyTimes.map((a) => ({
-=======
+  if (!rawUser) throw new Error("No user found");
+
+  const { selectedCalendars, ...currentUser } = rawUser;
+
   const busyTimes = await getBusyCalendarTimes(
     currentUser.credentials,
     dateFrom.format(),
@@ -74,22 +67,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // busyTimes.push(...await getBusyVideoTimes(currentUser.credentials, dateFrom.format(), dateTo.format()));
 
   const bufferedBusyTimes = busyTimes.map((a) => ({
->>>>>>> 06f5559ca00f9a106e8124b3dad127428bbc5694
     start: dayjs(a.start).subtract(currentUser.bufferTime, "minute").toString(),
     end: dayjs(a.end).add(currentUser.bufferTime, "minute").toString(),
   }));
 
-<<<<<<< HEAD
-  res.status(200).json(bufferedBusyTimes);
-=======
+  const timeZone = eventType?.timeZone || currentUser.timeZone;
+  const defaultAvailability = {
+    startTime: currentUser.startTime,
+    endTime: currentUser.endTime,
+    days: [0, 1, 2, 3, 4, 5, 6],
+  };
+  const workingHours = eventType?.availability.length
+    ? eventType.availability
+    : // currentUser.availability /* note(zomars) There's no UI nor default for this as of today */
+    [defaultAvailability]; /* note(zomars) For now, make every day available as fallback */
+
   res.status(200).json({
     busy: bufferedBusyTimes,
-    workingHours: {
-      daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
-      timeZone: currentUser.timeZone,
-      startTime: currentUser.startTime,
-      endTime: currentUser.endTime,
-    },
+    timeZone,
+    workingHours,
   });
->>>>>>> 06f5559ca00f9a106e8124b3dad127428bbc5694
 }
