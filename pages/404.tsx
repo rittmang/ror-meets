@@ -4,40 +4,42 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
 
+import { useLocale } from "@lib/hooks/useLocale";
+
 import { HeadSeo } from "@components/seo/head-seo";
 
-const links = [
-  {
-    title: "Documentation",
-    description: "Learn how to integrate our tools with your app",
-    icon: DocumentTextIcon,
-    href: "https://docs.cal.com",
-  },
-  {
-    title: "API Reference",
-    description: "A complete API reference for our libraries",
-    icon: CodeIcon,
-    href: "https://api.docs.cal.com",
-  },
-  {
-    title: "Blog",
-    description: "Read our latest news and articles",
-    icon: BookOpenIcon,
-    href: "https://cal.com/blog",
-  },
-];
-
 export default function Custom404() {
+  const { t } = useLocale();
   const router = useRouter();
   const username = router.asPath.replace("%20", "-");
+  const links = [
+    {
+      title: t("documentation"),
+      description: t("documentation_description"),
+      icon: DocumentTextIcon,
+      href: "https://docs.cal.com",
+    },
+    {
+      title: t("api_reference"),
+      description: t("api_reference_description"),
+      icon: CodeIcon,
+      href: "https://api.docs.cal.com",
+    },
+    {
+      title: t("blog"),
+      description: t("blog_description"),
+      icon: BookOpenIcon,
+      href: "https://cal.com/blog",
+    },
+  ];
 
   const isEventType404 = router.asPath.includes("/event-types");
 
   return (
     <>
       <HeadSeo
-        title="404: This page could not be found."
-        description="404: This page could not be found."
+        title={t("404_page_not_found")}
+        description={t("404_page_not_found")}
         nextSeoProps={{
           nofollow: true,
           noindex: true,
@@ -48,7 +50,7 @@ export default function Custom404() {
           <div className="text-center">
             <p className="text-sm font-semibold text-black uppercase tracking-wide">404 error</p>
             <h1 className="font-cal mt-2 text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl">
-              This page does not exist.
+              {t("page_doesnt_exist")}
             </h1>
           </div>
         </main>

@@ -21,7 +21,6 @@
         "ee/*"
       ]
     },
-    "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
     "strictNullChecks": true,
@@ -32,13 +31,18 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve"
+    "useUnknownInCatchVariables": true,
+    "jsx": "preserve",
+    "types": [
+      "@types/jest",
+      "jest-playwright-preset",
+      "expect-playwright"
+    ]
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx",
-    "lib/*.js"
+    "**/*.tsx"
   ],
   "exclude": [
     "node_modules"
